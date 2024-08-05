@@ -1,0 +1,6 @@
+{% extends 'main.html' %} {% load static %} 
+{% block content-main %}
+{% if module_path %}
+<div id="module_wrapper">{% include module_path %}</div>
+{% endif %}
+{% endblock %}

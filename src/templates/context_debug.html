@@ -1,0 +1,11 @@
+<div class="fb-container">
+  <div class="fb-item-wide">
+    <ul class="list-group p-0 rounded-0">
+      {% for k,v in context_debug.items %}
+      <li class="list-group-item bg-dark text-light p-0">
+        {{k}} : <span class="float-right">{{v}}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>

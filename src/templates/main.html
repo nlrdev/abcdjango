@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>{{ user.username }}@abcdjango</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  {% if css %} {% for script in css %}
+  <link rel="stylesheet" type="text/css" href="{% static script %}" />
+  {% endfor %} {% endif %}
+
+</head>
+
+<body>
+  <ul id="msg_queue" class="list-group" style="
+        position: fixed;
+        width: fit-content;
+        height: fit-content;
+        top: 50px;
+        right: 10px;
+        z-index: 2;
+      ">
+    {% include 'src/msgs.html' %}
+  </ul>
+
+  {% if context_debug %}
+  <!-- DEBUG CONTEXT -->
+  <div id="context_wrapper">
+    {% include "./context_debug.html" %}
+  </div>
+  <!--END DEBuG CONTEXT -->
+  {% endif %}
+
+  {% block content-main %}{% endblock %}
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+  integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+{% if javascript %} {% for script in javascript %}
+<script type="text/javascript" src="{% static script %}"></script>
+{% endfor %}
+{% endif %}
+
+</html>

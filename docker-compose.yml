@@ -1,0 +1,49 @@
+---
+version: "3"
+
+services:
+  abcdjango:
+    build: .
+    stdin_open: true
+    tty: true
+    env_file:
+      - .env
+    restart: always
+    command: bash -c "/usr/src/app/start.sh"
+    container_name: abcdjango
+    volumes:
+      - ./src:/usr/src/app
+    depends_on:
+      - abcdjango-db
+
+  abcdjango-nginx:
+    image: nginx:latest
+    restart: always
+    container_name: abcdjango_nginx
+    ports:
+      - 9090:80
+    volumes:
+      - ./src:/usr/src/app
+      - ./nginx:/etc/nginx/conf.d/
+    depends_on:
+      - abcdjango
+
+
+  abcdjango-db:
+    image: postgres
+    restart: always
+    container_name: abcdjango-db 
+    env_file:
+      - .env
+    volumes:
+      - abcdjango-db-data:/var/lib/postgresql/data
+
+
+volumes:
+  abcdjango-db-data:
+
+
+networks:
+  default:
+    external:
+      name: proxy

@@ -1,0 +1,21 @@
+{% extends 'main.html' %}
+{% block content-main %}
+<div class="container">
+  <div class="text-center">
+    <div class="row d-flex justify-content-center" style="padding-top: 35vh;">
+      <div style="width:300px;">
+        <form class="form" method="POST" action="{% url 'login' %}">
+          {% csrf_token %}
+          <input style="text-align: center" class="form-control text-center p-2 text-dark" type="email" name="email" />
+          <br>
+          <input style="text-align: center" class="form-control text-center p-2 text-dark" type="password"
+            name="password" />
+          <br>
+          <input style="text-align: center display: None;" class="form-control p-2 btn btn-outline-light shadow"
+            type="submit" value="Login" />
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   aria-hidden="true"
+   focusable="false"
+   data-prefix="fas"
+   data-icon="exclamation-triangle"
+   class="svg-inline--fa fa-exclamation-triangle fa-w-18"
+   role="img"
+   viewBox="0 0 197.52193 169.84467"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="404.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   width="197.52193"
+   height="169.84467"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs8" />
+  <sodipodi:namedview
+     id="namedview6"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="1.609375"
+     inkscape:cx="288"
+     inkscape:cy="106.56311"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <path
+     fill="currentColor"
+     d="m 195.29881,145.96456 c 6.32963,10.6133 -1.61549,23.8801 -14.25758,23.8801 H 16.478771 c -12.6664321,0 -20.5748509,-13.28736 -14.2575805,-23.8801 L 84.503451,7.956494 c 6.332701,-10.6182767 22.193769,-10.5990364 28.515169,0 z m -96.537781,-28.5329 c -8.711875,0 -15.774318,6.83193 -15.774318,15.25948 0,8.42754 7.062443,15.25948 15.774318,15.25948 8.711881,0 15.774321,-6.83194 15.774321,-15.25948 0,-8.42755 -7.06244,-15.25948 -15.774321,-15.25948 z M 83.784695,62.581788 86.328471,107.69677 c 0.118995,2.11111 1.923432,3.76379 4.108867,3.76379 h 16.647392 c 2.18543,0 3.98987,-1.65268 4.10887,-3.76379 l 2.54377,-45.114982 c 0.12859,-2.280298 -1.7482,-4.197684 -4.10886,-4.197684 H 87.893213 c -2.360666,0 -4.237117,1.917386 -4.108518,4.197684 z"
+     id="path2"
+     style="fill:#ff0000;fill-opacity:1;stroke-width:0.337277" />
+</svg>
