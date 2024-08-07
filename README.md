@@ -100,7 +100,7 @@ The ContextManager parent class is doing all the heavy lifting, as stated earlie
             if request.POST.get("action"):
                 self.action = bleach.clean(request.POST.get("action"))
             else:
-                self.action = page
+                self.action = self.page
 
             self.context = {
                 "current_page": request.path.split("/")[-2],
