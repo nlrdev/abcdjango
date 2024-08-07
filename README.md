@@ -1,7 +1,7 @@
 # abcDjango
 
 
-The idea is to have the 'view' purely focused on rendering an appropriate response, HTTP, JSON, etc. The 'view logic' code that builds the context for the response is abstracted to static class methods that inject the context into the views dispatch, post, get, etc methods but higher up in the method resolution order. This is a somewhat opinionated way of doing class-based views but not so much so that you are locked in, This was written to Django's workflow, rather than replacing it. 
+The idea is to have the 'view' purely focused on rendering an appropriate response, HTTP, JSON, etc. The 'view logic' code that builds the context for the response is abstracted to static class methods that inject the context into the views dispatch, post, get, etc methods but higher up in the method resolution order. This is a somewhat opinionated way of doing class-based views but not so much so that you are locked in, This was intended to complement Django's workflow, rather than replacing it. 
 
 ## URL's
 
