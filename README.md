@@ -31,7 +31,7 @@ These URL slugs are passed to the dynamic_view_loader as seen below.
 
 ### Loading the Views
 
-Now that we have our URL we need to call a view. This "dynamic_view_loader" function will take the first argument in the URL path and then call the appropriate class-based view for that app. When the app is created using the 'addmod' command line tool (Explained later). The applications, all sub-classes and function names are stored in a database. Using this info we build a dictionary of views based on the app names. Then call said view as a view and return the resulting HTTP Response.
+Now that the URL is set it's time to call a view. This "dynamic_view_loader" function will take the first argument in the URL path and then call the appropriate class-based view for that app. When the app is created using the 'addmod' command line tool (Explained later). The applications, all sub-classes and function names are stored in a database. Using this info to build a dictionary of views based on the app names. Then call said view as a view and return the resulting HTTP Response.
 
     def dynamic_view_loader[HttpResponse](request, app="website", module="default", page="index"):  
         app = bleach.clean(app)
@@ -61,7 +61,7 @@ Each app contains a single class-based view that extends ContextManager, and Con
 
 ### Class-based views
 
-In the example below we are returning JSON for AJAX/POST queries and using render to load templates for GET requests. This looks like a standard class-based view implementation, again you are not locked in you can return whatever you want here.
+The example below is returning JSON for AJAX/POST queries and using render to load templates for GET requests. This looks like a standard class-based view implementation, again you are not locked in you can return whatever you want here.
 
     class WebSite(ContextManager):
         def post(self, request):
@@ -79,11 +79,11 @@ In the example below we are returning JSON for AJAX/POST queries and using rende
                 debug(request, log=True, e=e)
                 return page_not_found_view(request, e)
 
-The file 'app/index.html' is in every app's template root file structure. Using a modular approach when creating templates combined with Django built-in includes in the template language. This file will load a tree of templates based on the values in the context Dictionary. Then using AJAX any templates that change dynamically can be reloaded and injected into the page using render_to_string on the backend to write the HTML to a JSON response and then update on the client side with some simple JavaScript. More details will follow. First, we need to understand "ContextManager".
+The file 'app/index.html' is in every app's template root file structure. Using a modular approach when creating templates combined with Django built-in includes in the template language. This file will load a tree of templates based on the values in the context Dictionary. Then using AJAX any templates that change dynamically can be reloaded and injected into the page using render_to_string on the backend to write the HTML to a JSON response and then update on the client side with some simple JavaScript. Details will follow.
 
 ### ContextManager
 
-The ContextManager parent class is doing all the heavy lifting, as stated earlier because of the 'method resolution order' any methods implemented here will execute before its concrete implementation above. In the dispatch method, all user input is cleaned and a context dictionary is created containing info such as paths for templates and static files, menus, and anything we need to build our response later. The post and get methods in ContextManager create dictionaries with all the static classes required for this app. We call our static method using a simple factory. Each static method needs to extend Callable 'explained further below'. This allows us to pass our view object directly into the static method as an argument. That method returns a new dictionary containing the context returned in the concrete implementation.
+The ContextManager parent class is doing all the heavy lifting, as stated earlier because of the 'method resolution order' any methods implemented here will execute before its concrete implementation above. In the dispatch method, all user input is cleaned and a context dictionary is created containing info such as paths for templates and static files, menus, and anything else required to build a response later. The post and get methods in ContextManager create dictionaries with all the static classes required for this app. Call our static method using a simple factory. Each static method needs to extend Callable 'explained further below'. This allows us to pass our view object directly into the static method as an argument. That method returns a new dictionary containing the context returned in the concrete implementation.
 
  
     class ContextManager(View):
@@ -148,7 +148,7 @@ As mentioned this base class allows the extending class's static methods to be c
 
 ### Static methods
 
-Here is where we build context dictionaries needed to build the JSON or render that template. In the use case, the default route is specified in the dynamic_view_loader. These are used in the case that no URL path is presented. These defaults can be whatever you want assuming it matches an existing app using the above-mentioned methodology. The default for this example is `app="website", module="default", page="index"`. So if the user loads the site the index method below containing the dictionary is returned as context. POST requests are much the same, however, you need to send a param in the post request containing the action/method name you are looking for.
+The static methods build context dictionaries needed to create the JSON or render that template. In the use case, the default route is specified in the dynamic_view_loader. These are used in the case that no URL path is presented. These defaults can be whatever you want assuming it matches an existing app using the above-mentioned methodology. The default for this example is `app="website", module="default", page="index"`. So if the user loads the site the index method below containing the dictionary is returned as context. POST requests are much the same, however, you need to send a param in the post request containing the action/method name you are looking for.
 
     class DefaultContext(Callable):
         @staticmethod
