@@ -33,10 +33,13 @@ These URL slugs are passed to the dynamic_view_loader as seen below.
 
 Now that the URL is set it's time to call a view. This "dynamic_view_loader" function will take the first argument in the URL path and then call the appropriate class-based view for that app. When the app is created using the 'addmod' command line tool (Explained later). The applications, all sub-classes and function names are stored in a database. Using this info to build a dictionary of views based on the app names. Then call said view as a view and return the resulting HTTP Response.
 
-    def dynamic_view_loader[HttpResponse](request, app="website", module="default", page="index"):  
-        app = bleach.clean(app)
-        module = bleach.clean(module)
-        page = bleach.clean(page)  
+    def dynamic_view_loader[HttpResponse](request, app=None, module=None, page=None):  
+        if app is None:
+            app = "website"
+        if module is None:
+            module = "default"
+        if page is None:
+            page = "index"
 
         app_views = App.objects.all()
         apps = {}
@@ -88,8 +91,12 @@ The ContextManager parent class is doing all the heavy lifting, as stated earlie
  
     class ContextManager(View):
         def dispatch(self, request, app=None, module=None, page=None):
-            self.app = app
-            self.module = module
+            if app is not None:
+                self.app = bleach.clean(app)
+            if module is not None:
+                self.module = bleach.clean(module)
+            if page is not None:
+                self.page = bleach.clean(page)
             if request.POST.get("action"):
                 self.action = bleach.clean(request.POST.get("action"))
             else:
