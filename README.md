@@ -148,7 +148,7 @@ As mentioned this base class allows the extending class's static methods to be c
 
 ### Static methods
 
-Here is where we build context dictionaries needed to build the JSON or render that template. In my use case, the default route is specified in the dynamic_view_loader. These are used in the case that no URL path is presented. These defaults can be whatever you want assuming it matches an existing app using the above-mentioned methodology. My default for this example is `app="website", module="default", page="index"`. So if the user loads my site the index method below containing the dictionary is returned as context. POST requests are much the same, however, you need to send a param in the post request containing the action/method name you are looking for.
+Here is where we build context dictionaries needed to build the JSON or render that template. In the use case, the default route is specified in the dynamic_view_loader. These are used in the case that no URL path is presented. These defaults can be whatever you want assuming it matches an existing app using the above-mentioned methodology. The default for this example is `app="website", module="default", page="index"`. So if the user loads the site the index method below containing the dictionary is returned as context. POST requests are much the same, however, you need to send a param in the post request containing the action/method name you are looking for.
 
     class DefaultContext(Callable):
         @staticmethod
