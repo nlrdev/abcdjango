@@ -3,15 +3,18 @@ from .util import render, debug, page_error_view, page_not_found_view
 from core.models import App
 
 
+def dynamic_view_loader[HttpResponse](request, app=None, module=None, page=None):
+    if app is None:
+        app = "website"
+    if module is None:
+        module = "default"
+    if page is None:
+        page = "index"
 
-
-def dynamic_view_loader[HttpResponse](request, app="website", module="default", page="index"):    
-    app_views = App.objects.all()
-    apps = {}
-    if app_views:    
+    app_views, apps = App.objects.all(), {}
+    if app_views:
         for _app in app_views:
-            cls = getattr(import_module(f"{_app.app_name}.views"), _app.cls_name)
-            apps |= {_app.url_name: cls}
+            apps |= {_app.url_name: getattr(import_module(f"{_app.app_name}.views"), _app.cls_name)}
 
     try:
         return apps[app].as_view()(request, app, module, page)

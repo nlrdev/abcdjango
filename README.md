@@ -1,7 +1,7 @@
 # abcDjango
 
 
-The yet-to-be-determined quality idea is... Have the 'view' purely focused on rendering an appropriate response, HTTP, JSON, etc. The 'view logic' code that builds the context for the response is abstracted to static class methods that inject the context into the views dispatch, post, get, etc methods but higher up in the method resolution order. This is a somewhat opinionated way of doing class-based views but not so much so that you are locked in, I tried to write this so that it complements Django's workflow, rather than replacing it. 
+The idea is to have the 'view' purely focused on rendering an appropriate response, HTTP, JSON, etc. The 'view logic' code that builds the context for the response is abstracted to static class methods that inject the context into the views dispatch, post, get, etc methods but higher up in the method resolution order. This is a somewhat opinionated way of doing class-based views but not so much so that you are locked in, This was written to Django's workflow, rather than replacing it. 
 
 ## URL's
 
@@ -31,7 +31,7 @@ These URL slugs are passed to the dynamic_view_loader as seen below.
 
 ### Loading the Views
 
-Now that we have our url we need to call a view. This "dynamic_view_loader" function will take the first argument in the URL path and then call the appropriate class-based view for that app. When the app is created using the 'addmod' command line tool (Explained later). The applications, all sub-classes and function names are stored in a database. Using this info we build a dictionary of views based on the app names. Then call said view as a view and return the resulting HTTP Response.
+Now that we have our URL we need to call a view. This "dynamic_view_loader" function will take the first argument in the URL path and then call the appropriate class-based view for that app. When the app is created using the 'addmod' command line tool (Explained later). The applications, all sub-classes and function names are stored in a database. Using this info we build a dictionary of views based on the app names. Then call said view as a view and return the resulting HTTP Response.
 
     def dynamic_view_loader[HttpResponse](request, app="website", module="default", page="index"):  
         app = bleach.clean(app)
@@ -57,7 +57,7 @@ Now that we have our url we need to call a view. This "dynamic_view_loader" func
 
 ## VIEWS
 
-Each app contains a single class-based view that extends ContextManager, and ContextManager extends View. The views have one job 'return a response'. Extending View allows us all the functionality of a standard Django class-based view but with some extra magic. For this example and in every use case I have implemented some derivative of this, I only ever needed a get and post method but it can be extended to support any HTTP method. 
+Each app contains a single class-based view that extends ContextManager, and ContextManager extends View. The views have one job 'return a response'. Extending View allows us all the functionality of a standard Django class-based view but with some extra magic. For this example and every use case implemented some derivative of this, only ever needed a get and post method but it can be extended to support any HTTP method. 
 
 ### Class-based views
 
@@ -79,11 +79,11 @@ In the example below we are returning JSON for AJAX/POST queries and using rende
                 debug(request, log=True, e=e)
                 return page_not_found_view(request, e)
 
-I use 'app/index.html' in every app at the root of the app's template file structure. Using a modular approach when creating templates combined with Django built-in includes in the template language. This file will load a tree of templates based on the values in the context Dictionary. Then using AJAX any templates that change dynamically can be reloaded and injected into the page using render_to_string on the backend to write the HTML to a JSON response and then update on the client side with some simple JavaScript. I will get into this more down the road. First, we need to understand "ContextManager".
+The file 'app/index.html' is in every app's template root file structure. Using a modular approach when creating templates combined with Django built-in includes in the template language. This file will load a tree of templates based on the values in the context Dictionary. Then using AJAX any templates that change dynamically can be reloaded and injected into the page using render_to_string on the backend to write the HTML to a JSON response and then update on the client side with some simple JavaScript. More details will follow. First, we need to understand "ContextManager".
 
 ### ContextManager
 
-The ContextManager parent class is doing all the heavy lifting, as I said earlier because of the 'method resolution order' any methods implemented here will execute before its concrete implementation above. In the dispatch method, all user input is cleaned and a context dictionary is created containing info such as paths for templates and static files, menus, and anything we need to build our response later. The post and get methods in ContextManager create dictionaries with all the static classes required for this app. We call our static method using a simple factory. Each static method needs to extend Callable 'explained further below'. This allows us to pass our view object directly into the static method as an argument. That method returns a new dictionary containing the context returned in the concrete implementation.
+The ContextManager parent class is doing all the heavy lifting, as stated earlier because of the 'method resolution order' any methods implemented here will execute before its concrete implementation above. In the dispatch method, all user input is cleaned and a context dictionary is created containing info such as paths for templates and static files, menus, and anything we need to build our response later. The post and get methods in ContextManager create dictionaries with all the static classes required for this app. We call our static method using a simple factory. Each static method needs to extend Callable 'explained further below'. This allows us to pass our view object directly into the static method as an argument. That method returns a new dictionary containing the context returned in the concrete implementation.
 
  
     class ContextManager(View):
@@ -142,13 +142,13 @@ The ContextManager parent class is doing all the heavy lifting, as I said earlie
 As mentioned this base class allows the extending class's static methods to be called from ContextManager. By extending Callable when the class's `__call__` method is invoked the `getattr` function is called that uses `self.action` to call the appropriate static method passing the view as the argument.
 
     class Callable(object):
-        def __call__(self: object, cls: object) -> dict:
+        def __call__[dict](self: object, cls: object):
             return getattr(self, cls.action)(cls)
 
 
 ### Static methods
 
-Here is where we build context dictionaries needed to build the JSON or render that template. In my use case, the default route is specified in the dynamic_view_loader. These are used the case that no URL path is presented, the home page. These defaults can be whatever you want assuming it matches an existing app using the above-mentioned methodology. My default for this example is app="website", module="default", page="index". So if the user loads my site the index method below containing the dictionary is returned as context. POST requests are much the same, however, you need to send a param in the post request containing the action/method name you are looking for.
+Here is where we build context dictionaries needed to build the JSON or render that template. In my use case, the default route is specified in the dynamic_view_loader. These are used in the case that no URL path is presented. These defaults can be whatever you want assuming it matches an existing app using the above-mentioned methodology. My default for this example is `app="website", module="default", page="index"`. So if the user loads my site the index method below containing the dictionary is returned as context. POST requests are much the same, however, you need to send a param in the post request containing the action/method name you are looking for.
 
     class DefaultContext(Callable):
         @staticmethod
@@ -160,7 +160,7 @@ Here is where we build context dictionaries needed to build the JSON or render t
 
     class DefaultAjax(Callable):
         @staticmethod
-        def index(view: object) -> dict:
+        def index[dict](view: object):
             return {
                 "index": "index",
             }
@@ -169,7 +169,7 @@ Below is a simple example from another project, creating a context dictionary re
 
     class ServerManagerAjax(Callable):
         @staticmethod
-        def add_server(portal: object) -> dict:
+        def add_server[dict](portal: object):
             page = render_to_string(
                 "portal/server_manager/add_server.html",
                 {
@@ -206,13 +206,10 @@ Called and updated here rendering the model.
         });
     }
 
-This is extremely extendable and pretty powerful. I am a huge fan of server-side rending and prefer using as little JavaScript as possible. 
-
-
 
 ### Creating an 'App'
 
-I created a manage.py command, a 'wrapper' around the Django 'startapp' command that takes 3 args and builds out the boilerplate code required for this to work. Mostly. It's not finished. 
+A manage.py command, a 'wrapper' around the Django 'startapp' command that takes 3 args and builds out the boilerplate code required for this to work. Mostly. It's not finished.
 
 Usage: 
    
