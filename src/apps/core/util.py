@@ -29,11 +29,9 @@ from .models import Link, Module
 logger = logging.getLogger("file_logger")
 
 
-class ContextManager(View, metaclass=abc.ABCMeta):
-    class Meta:
-        abstract = True
-
+class ContextManager(View):
     def dispatch(self, request, app=None, module=None, page=None):
+        print(app)
         if app is not None:
             self.app = bleach.clean(app)
 
@@ -85,26 +83,24 @@ class ContextManager(View, metaclass=abc.ABCMeta):
 
     def post(self, request):
         try:
-            modules, module_factory = Module.objects.filter(app__app_name=self.app), {}
-            for module in modules:
-                cls = getattr(
-                    import_module(f"{self.app}.ajax"), f"{module.cls_name}Ajax"
-                )
-                module_factory |= {module.url_name: cls}
-            self.context = module_factory[self.module]()(self)
+            module = get_object_or_404(
+                Module, app__app_name=self.app, url_name=self.module
+            )
+            self.context = getattr(
+                import_module(f"{self.app}.ajax"), f"{module.cls_name}Ajax"
+            )()(self)
             return super(ContextManager, self).post(request)
         except Exception as e:
             raise e
 
     def get(self, request):
         try:
-            modules, module_factory = Module.objects.filter(app__app_name=self.app), {}
-            for module in modules:
-                cls = getattr(
-                    import_module(f"{self.app}.context"), f"{module.cls_name}Context"
-                )
-                module_factory |= {module.url_name: cls}
-            self.context = module_factory[self.module]()(self)
+            module = get_object_or_404(
+                Module, app__app_name=self.app, url_name=self.module
+            )
+            self.context = getattr(
+                import_module(f"{self.app}.context"), f"{module.cls_name}Context"
+            )()(self)
             return super(ContextManager, self).get(request)
         except Exception as e:
             raise e
