@@ -29,9 +29,11 @@ from .models import Link, Module
 logger = logging.getLogger("file_logger")
 
 
-class ContextManager(View):
+class ContextManager(View, metaclass=abc.ABCMeta):
+    class Meta:
+        abstract = True
+        
     def dispatch(self, request, app=None, module=None, page=None):
-        print(app)
         if app is not None:
             self.app = bleach.clean(app)
 
