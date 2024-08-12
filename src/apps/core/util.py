@@ -58,8 +58,9 @@ class ContextManager(View, metaclass=abc.ABCMeta):
         else:
             self.uid = None
 
+        current_page = bleach.clean(request.path.split("/")[-2])
         self.context = {
-            "current_page": request.path.split("/")[-2],
+            "current_page": current_page if current_page else "home",
             "app": self.app,
             "module": self.module,
             "page": self.page,
@@ -75,9 +76,6 @@ class ContextManager(View, metaclass=abc.ABCMeta):
                 "css/main.css",
             ],
         }
-        if self.context["current_page"] == None:
-            self.context["current_page"] == "home"
-
         return super(ContextManager, self).dispatch(request)
 
     def no_context[dict](*args, **kwargs):

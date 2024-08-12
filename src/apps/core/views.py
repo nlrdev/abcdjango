@@ -18,9 +18,6 @@ def dynamic_view_loader[HttpResponse](request, app=None, module=None, page=None)
         return getattr(
             import_module(f"{_app.app_name}.views"), _app.cls_name
         ).as_view()(request, app, module, page)
-    except KeyError as e:
-        debug(request, log=True, e=e)
-        return page_not_found_view(request, e)
     except Exception as e:
         debug(request, log=True, e=e)
-        return page_error_view(request)
+        return page_not_found_view(request, e)
