@@ -8,6 +8,8 @@ python manage.py initapp
 echo "collectstatic"
 python manage.py collectstatic --no-input
 echo "starting app"
+
+#dev
 uvicorn config.asgi:abcdjango --port 80 --host 0.0.0.0 --reload --reload-include '*.html'
 
 # daphne config.asgi:abcdjango --port 80 --bind 0.0.0.0 -v2
