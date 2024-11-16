@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     restart: always
-    command: bash -c "/usr/src/app/start.sh"
+    command: bash -c "/usr/src/setup/start.sh"
     container_name: abcdjango
     volumes:
       - ./src:/usr/src/app

@@ -10,12 +10,8 @@ from config.settings import BASE_DIR
 class Command(BaseCommand):
     """
         Usage:
-
         $python manage.py addmod app module function
         
-            
-
-
     """
 
     def __init__(self, *args, **kwargs):
@@ -181,7 +177,7 @@ def new_context_class(name):
 
 class {name.capitalize()}Context(Callable):
     @staticmethod
-    def index(view: object) -> dict:
+    def index[dict](view: object):
         return \u007b
             "{name}": "{name}",
         \u007d
@@ -195,7 +191,7 @@ def new_ajax_class(name):
 
 class {name.capitalize()}Ajax(Callable):
     @staticmethod
-    def index(view: object) -> dict:
+    def index[dict](view: object):
         return \u007b
             "{name}": "{name}",
         \u007d
@@ -206,7 +202,7 @@ class {name.capitalize()}Ajax(Callable):
 def new_func(name):
     return f"""
     @staticmethod
-    def {name}(view: object) -> dict:
+    def {name}[dict](view: object):
         return \u007b
             "{name}": "{name}",
         \u007d

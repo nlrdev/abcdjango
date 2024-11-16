@@ -32,7 +32,7 @@ logger = logging.getLogger("file_logger")
 class ContextManager(View, metaclass=abc.ABCMeta):
     class Meta:
         abstract = True
-
+        
     def dispatch(self, request, app=None, module=None, page=None):
         if app is not None:
             self.app = bleach.clean(app)
@@ -58,16 +58,17 @@ class ContextManager(View, metaclass=abc.ABCMeta):
         else:
             self.uid = None
 
+        current_page = bleach.clean(request.path.split("/")[-2])
         self.context = {
-            "current_page": request.path.split("/")[-2],
+            "current_page": current_page if current_page else "home",
             "app": self.app,
             "module": self.module,
             "page": self.page,
             "app_path": f"{self.app}/index.html",
             "module_path": f"{self.app}/{self.module}/{self.page}.html",
-            #"main_nav": Link.objects.filter(nav__name__contains=app),
-            #"module_nav": Link.objects.filter(nav__name__contains=self.module),
-            #"page_nav": Link.objects.filter(nav__name__contains=self.page),
+            # "main_nav": Link.objects.filter(nav__name__contains=app),
+            # "module_nav": Link.objects.filter(nav__name__contains=self.module),
+            # "page_nav": Link.objects.filter(nav__name__contains=self.page),
             "javascript": [
                 f"js/{app}/{self.module}.js",
             ],
@@ -75,42 +76,31 @@ class ContextManager(View, metaclass=abc.ABCMeta):
                 "css/main.css",
             ],
         }
-        if self.context["current_page"] == None:
-            self.context["current_page"] == "home"
-            
         return super(ContextManager, self).dispatch(request)
 
-    def pass_context(*args, **kwargs) -> None:
-        pass
-
-    def no_context(*args, **kwargs) -> dict:
+    def no_context[dict](*args, **kwargs):
         return {}
 
     def post(self, request):
         try:
-            modules, module_factory = Module.objects.filter(app__app_name=self.app), {}
-            for module in modules:
-                cls = getattr(import_module(f"{self.app}.ajax"), f"{module.cls_name}Ajax")
-                module_factory |= {module.url_name: cls}
-            self.context = module_factory[self.module]()(self)
+            module = get_object_or_404(Module, app__app_name=self.app, url_name=self.module)
+            self.context = getattr(import_module(f"{self.app}.ajax"), f"{module.cls_name}Ajax")()(self)
             return super(ContextManager, self).post(request)
         except Exception as e:
             raise e
 
     def get(self, request):
         try:
-            modules, module_factory = Module.objects.filter(app__app_name=self.app), {}
-            for module in modules:
-                cls = getattr(import_module(f"{self.app}.context"), f"{module.cls_name}Context")
-                module_factory |= {module.url_name: cls}
-            self.context = module_factory[self.module]()(self)
+            module = get_object_or_404(Module, app__app_name=self.app, url_name=self.module)
+            self.context = getattr(import_module(f"{self.app}.context"), f"{module.cls_name}Context")()(self)
             return super(ContextManager, self).get(request)
         except Exception as e:
             raise e
 
 
+
 class Callable(object):
-    def __call__(self: object, cls: object) -> dict:
+    def __call__[dict](self: object, cls: object):
         return getattr(self, cls.action)(cls)
 
 
@@ -127,7 +117,7 @@ class StaffRequired(object):
         return super(StaffRequired, self).dispatch(request, *args, **kwargs)
 
 
-def get_msgs(request):
+def get_msgs[dict](request):
     return render_to_string(
         "src/msgs.html",
         {"msg": get_messages(request)},
@@ -146,17 +136,17 @@ def debug(request, pop=False, msg=None, tag=None, log=False, e=None):
         logger.exception(e)
 
 
-def is_ajax(request):
+def is_ajax[bool](request):
     return (
         True if request.headers.get("x-requested-with") == "XMLHttpRequest" else False
     )
 
 
-def is_post(request):
+def is_post[bool](request):
     return True if request.method == "POST" else False
 
 
-def is_get(request):
+def is_get[bool](request):
     return True if request.method == "GET" else False
 
 
@@ -169,37 +159,8 @@ def time():
     return now.strftime("%y/%m/%d %H:%M:%S.%f")
 
 
-def deserialize_form(data):
+def deserialize_form[dict](data):
     return dict(i.split("=") for i in data.split("&"))
-
-
-def send_contact_mail(request):
-    name = bleach.clean(request.POST.get("name"))
-    email = bleach.clean(request.POST.get("email"))
-    subject = bleach.clean(request.POST.get("subject"))
-    message = bleach.clean(request.POST.get("message"))
-    try:
-        send_mail(
-            f"Message from Name:[{name}] Email:[{email}] Regarding:[{subject}]",
-            f"{message}",
-            "noreply@silimasoftware.com",
-            ["contact@silimasoftware.com"],
-        )
-    except SMTPException as e:
-        messages.error(
-            request,
-            message=f"{time()} ERROR: {e} ",
-            extra_tags="danger",
-        )
-        return {"msg_list": get_msgs(request)}
-    else:
-        # submit counter
-        if "support_mail_sent" in request.session:
-            request.session["support_mail_sent"] += 1
-        else:
-            request.session["support_mail_sent"] = 1
-
-        return {"success": "True"}
 
 
 def page_not_found_view(request, exception):
