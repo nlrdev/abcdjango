@@ -17,11 +17,8 @@ class WebSite(ContextManager):
 
 
     def get(self, request):
-        try:
-            # debug
-            self.context |= {"context_debug": copy.deepcopy(self.context)}
-            
-            return render(request, "website/index.html", self.context)
+        try:          
+            return render(request, "website/index.html", request.context)
         except Exception as e:
             debug(request, log=True, e=e)
             return page_not_found_view(request, e)

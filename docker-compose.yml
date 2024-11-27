@@ -46,4 +46,4 @@ volumes:
 networks:
   default:
     external:
-      name: proxy
+      name: hostnet

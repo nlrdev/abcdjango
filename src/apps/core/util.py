@@ -33,66 +33,21 @@ class ContextManager(View, metaclass=abc.ABCMeta):
     class Meta:
         abstract = True
         
-    def dispatch(self, request, app=None, module=None, page=None):
-        if app is not None:
-            self.app = bleach.clean(app)
-
-        if module is not None:
-            self.module = bleach.clean(module)
-
-        if page is not None:
-            self.page = bleach.clean(page)
-
-        if request.POST.get("action"):
-            self.action = bleach.clean(request.POST.get("action"))
-        else:
-            self.action = page
-
-        if request.POST.get("tag"):
-            self.tag = bleach.clean(request.POST.get("tag"))
-        else:
-            self.tag = None
-
-        if request.POST.get("uid"):
-            self.uid = bleach.clean(request.POST.get("uid"))
-        else:
-            self.uid = None
-
-        current_page = bleach.clean(request.path.split("/")[-2])
-        self.context = {
-            "current_page": current_page if current_page else "home",
-            "app": self.app,
-            "module": self.module,
-            "page": self.page,
-            "app_path": f"{self.app}/index.html",
-            "module_path": f"{self.app}/{self.module}/{self.page}.html",
-            # "main_nav": Link.objects.filter(nav__name__contains=app),
-            # "module_nav": Link.objects.filter(nav__name__contains=self.module),
-            # "page_nav": Link.objects.filter(nav__name__contains=self.page),
-            "javascript": [
-                f"js/{app}/{self.module}.js",
-            ],
-            "css": [
-                "css/main.css",
-            ],
-        }
-        return super(ContextManager, self).dispatch(request)
-
     def no_context[dict](*args, **kwargs):
         return {}
 
     def post(self, request):
         try:
-            module = get_object_or_404(Module, app__app_name=self.app, url_name=self.module)
-            self.context = getattr(import_module(f"{self.app}.ajax"), f"{module.cls_name}Ajax")()(self)
+            module = get_object_or_404(Module, app__app_name=request.app, url_name=request.module)
+            request.context = getattr(import_module(f"{request.app}.ajax"), f"{module.cls_name}Ajax")()(self)
             return super(ContextManager, self).post(request)
         except Exception as e:
             raise e
 
     def get(self, request):
         try:
-            module = get_object_or_404(Module, app__app_name=self.app, url_name=self.module)
-            self.context = getattr(import_module(f"{self.app}.context"), f"{module.cls_name}Context")()(self)
+            module = get_object_or_404(Module, app__app_name=request.app, url_name=request.module)
+            request.context = getattr(import_module(f"{request.app}.context"), f"{module.cls_name}Context")()(self)
             return super(ContextManager, self).get(request)
         except Exception as e:
             raise e
