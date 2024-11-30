@@ -39,7 +39,7 @@ class ContextManager(View, metaclass=abc.ABCMeta):
     def post(self, request):
         try:
             module = get_object_or_404(Module, app__app_name=request.app, url_name=request.module)
-            request.context = getattr(import_module(f"{request.app}.ajax"), f"{module.cls_name}Ajax")()(self)
+            request.context |= getattr(import_module(f"{request.app}.ajax"), f"{module.cls_name}Ajax")()(request)
             return super(ContextManager, self).post(request)
         except Exception as e:
             raise e
@@ -47,7 +47,7 @@ class ContextManager(View, metaclass=abc.ABCMeta):
     def get(self, request):
         try:
             module = get_object_or_404(Module, app__app_name=request.app, url_name=request.module)
-            request.context = getattr(import_module(f"{request.app}.context"), f"{module.cls_name}Context")()(self)
+            request.context |= getattr(import_module(f"{request.app}.context"), f"{module.cls_name}Context")()(request)
             return super(ContextManager, self).get(request)
         except Exception as e:
             raise e

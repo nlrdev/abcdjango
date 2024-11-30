@@ -1,7 +1,6 @@
 # abcDjango
 
-In this example the 'view' renders an appropriate response, HTTP, JSON, etc. The 'view logic' code that builds the context for the response is abstracted to static class methods that inject the context into the view dispatch, post, get, etc methods higher up in the method resolution order.
-
+In this example the 'view' renders an appropriate response, HTTP, JSON, etc. The 'view logic' code that builds the context for the response is abstracted to middleware and static class methods that inject the context into the request object via, post, get, etc methods higher up in the method resolution order.
 
 ## URL's
 
@@ -30,25 +29,15 @@ These URL slugs are passed to the dynamic_view_loader as seen below.
 
 ### Loading the Views
 
-The "dynamic_view_loader" function will take the first argument in the URL path and then call the appropriate class-based view. Then call said view function and return the resulting HTTP Response.
+The "dynamic_view_loader" function will take the arguments in the URL path and then call the appropriate class-based view.
 
     def dynamic_view_loader[HttpResponse](request, app=None, module=None, page=None):
-        if app is None:
-            app = "website"
-
-        if module is None:
-            module = "default"
-
-        if page is None:
-            page = "index"
-
         try:
-            _app = get_object_or_404(App, app_name=app)
-            return getattr(import_module(f"{_app.app_name}.views"), _app.cls_name).as_view()(request, app, module, page)
+            _app = get_object_or_404(App, app_name=request.app)
+            return getattr(import_module(f"{_app.app_name}.views"), _app.cls_name).as_view()(request)
         except Exception as e:
             debug(request, log=True, e=e)
             return page_not_found_view(request, e)
-
 
 ## VIEWS
 
@@ -74,62 +63,72 @@ Example below is returning JSON for AJAX/POST queries and using render to load t
                 debug(request, log=True, e=e)
                 return page_not_found_view(request, e)
 
+### ContextMiddleware
+
+The ContextMiddleware executes before the view is loaded, we call process_view and create a context dictionary to assist in routing loading the rest of our request.
+
+class ContextMiddleware:
+def **init**(self, get_response):
+self.get_response = get_response
+
+    def __call__(self, request):
+        try:
+            return self.get_response(request)
+        except Exception as e:
+            logger.error(e)
+
+
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        url_vars = request.resolver_match.kwargs if request.resolver_match else {}
+        request.app = bleach.clean(view_kwargs.get("app", "website"))
+        request.module = bleach.clean(view_kwargs.get("module", "default"))
+        request.page = bleach.clean(view_kwargs.get("page", "index"))
+
+        request.context = {
+            "current_page": request.current_page if request.current_page else "home",
+            "app": request.app,
+            "module": request.module,
+            "page": request.page,
+            "app_path": f"{request.app}/index.html",
+            "module_path": f"{request.app}/{request.module}/{request.page}.html",
+            "javascript": [
+                f"js/{request.app}/{request.module}.js",
+            ],
+            "css": [
+                "css/main.css",
+            ],
+        }
+
 ### ContextManager
 
-The ContextManager executes before its concrete implementation. In the dispatch method, all user input is cleaned and a context dictionary is created. The post and get methods dynamically import the required static classes. This works by using `getattr` to invoke the `__call__` method on the static class. 
+The ContextManager executes request methods higher up in the 'method resolution order', before its concrete implementation. The post and get methods dynamically import the required static classes and return the context dictionary. This works by using `getattr` to invoke the `__call__` method on the static class.
 
-    class ContextManager(View):
-        def dispatch(self, request, app=None, module=None, page=None):
-            if app is not None:
-                self.app = bleach.clean(app)
-            if module is not None:
-                self.module = bleach.clean(module)
-            if page is not None:
-                self.page = bleach.clean(page)
-            if request.POST.get("action"):
-                self.action = bleach.clean(request.POST.get("action"))
-            else:
-                self.action = self.page
+    class ContextManager(View, metaclass=abc.ABCMeta):
+        class Meta:
+            abstract = True
 
-            self.context = {
-                "current_page": request.path.split("/")[-2],
-                "app": self.app,
-                "module": self.module,
-                "page": self.page,
-                "app_path": f"{self.app}/index.html",
-                "module_path": f"{self.app}/{self.module}/{self.page}.html",
-                #"main_nav": Link.objects.filter(nav__name__contains=app),
-                #"module_nav": Link.objects.filter(nav__name__contains=self.module),
-                #"page_nav": Link.objects.filter(nav__name__contains=self.page),
-                "javascript": [
-                    f"js/{app}/{self.module}.js",
-                ],
-                "css": [
-                    "css/main.css",
-                ],
-            }
-
-            return super(ContextManager, self).dispatch(request)
+        def no_context[dict](*args, **kwargs):
+            return {}
 
         def post(self, request):
             try:
-                module = get_object_or_404(Module, app__app_name=self.app, url_name=self.module)
-                self.context = getattr(import_module(f"{self.app}.ajax"), f"{module.cls_name}Ajax")()(self)
+                module = get_object_or_404(Module, app__app_name=request.app, url_name=request.module)
+                request.context |= getattr(import_module(f"{request.app}.ajax"), f"{module.cls_name}Ajax")()(request)
                 return super(ContextManager, self).post(request)
             except Exception as e:
                 raise e
 
         def get(self, request):
             try:
-                module = get_object_or_404(Module, app__app_name=self.app, url_name=self.module)
-                self.context = getattr(import_module(f"{self.app}.context"), f"{module.cls_name}Context")()(self)
+                module = get_object_or_404(Module, app__app_name=request.app, url_name=request.module)
+                request.context |= getattr(import_module(f"{request.app}.context"), f"{module.cls_name}Context")()(request)
                 return super(ContextManager, self).get(request)
             except Exception as e:
                 raise e
 
 ### Callable
 
-The static classes extend Callable, when the `__call__` method is invoked we again use `getattr` function with `self.action` to call the appropriate static method passing the view as the argument.
+The static classes extend a custom Callable class, when the `__call__` method is invoked we again use `getattr` function with `self.action` to call the appropriate static method passing the view as the argument.
 
     class Callable(object):
         def __call__[dict](self: object, cls: object):

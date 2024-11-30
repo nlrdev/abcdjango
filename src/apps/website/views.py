@@ -10,7 +10,7 @@ from core.util import (
 class WebSite(ContextManager):
     def post(self, request):
         try:
-            return JsonResponse(self.context)
+            return JsonResponse(request.context)
         except Exception as e:
             debug(request, log=True, e=e)
             return JsonResponse({"error": e})
